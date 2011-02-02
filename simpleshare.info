@@ -1,0 +1,4 @@
+name = Simpleshare
+description = Simple Integration to share content on facebook and twitter
+package = Other
+core = 6.x

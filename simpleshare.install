@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Install file for simpleshare.module.
+ * Set the weight of our module super high
+ */
+
+
+// Set weight so that simpleshare comes after other stuff
+function simpleshare_install() {
+  db_query("UPDATE {system} SET weight = 10 WHERE name='simpleshare'");
+}

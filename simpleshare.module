@@ -1,0 +1,67 @@
+<?php
+
+/**
+ * @file
+ *
+ * Very simple integration to post stuff to fb and twitter
+ */
+
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Adds a checkbox to node edit and comment forms.  This checkbox lets
+ * facebook users know that content may be published to their Wall,
+ * and gives them a chance to prevent that.
+ */
+function simpleshare_form_alter(&$form, $form_state, $form_id) {
+  // Add stream publish option.
+    if ($form['#id'] == 'node-form') {
+      // Add checkbox to control feed publish.
+      $form['simpleshare'] = array(
+        '#type' => 'fieldset',
+        '#title' => 'Share',
+      );
+      
+      $form['simpleshare']['ss_fb'] = array(
+        '#type' => 'checkbox',
+        '#title' => 'Share on Facebook',
+        '#default_value' => FALSE,
+      );
+    $form['simpleshare']['ss_twitter'] = array(
+        '#type' => 'checkbox',
+        '#title' => 'Share on Twitter',
+        '#default_value' => FALSE,
+      );
+      
+    $form['#submit'][] = 'simpleshare_node_submit';
+   
+    }
+    
+
+    
+}
+
+/**
+  * Submit handler for simpleshare
+  */
+function simpleshare_node_submit(&$form, $form_state) {
+    
+    if($form_state['values']['ss_fb'] == 1 || $form_state['values']['ss_twitter'] == 1) {
+      $fb_appid = '140132722716254';
+      $link = url('node/' . $node->nid, array('absolute' => TRUE));
+      $title = $form_state['values']['title'];
+      $message= 'Just posted ' . filter_xss($form_state['values']['teaser']);
+      $picture = 'http://mustardseed.dyndns.tv/screencast/sites/all/themes/acquia_marina/logo.png';
+      $redirect =  url('node/' . $node->nid, array('absolute' => TRUE));
+    
+          
+    $path = url('http://www.facebook.com/dialog/feed');
+    $query = array('app_id' => $fb_appid, 'link' => $link, 'picture' => $picture, 'name' => $title, 'caption' => $caption, 'message' => $message, 'redirect_uri' =>$redirect);
+    
+    drupal_goto($path, $query, $fragment);
+      
+      
+    }
+
+}
