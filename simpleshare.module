@@ -20,16 +20,12 @@ function simpleshare_form_alter(&$form, $form_state, $form_id) {
       $form['simpleshare'] = array(
         '#type' => 'fieldset',
         '#title' => 'Share',
+        '#description' => 'After submitting this content you will be be given the oppotunity to share it on facebook and twitter if you check this box',
       );
       
-      $form['simpleshare']['ss_fb'] = array(
+      $form['simpleshare']['ss_share'] = array(
         '#type' => 'checkbox',
-        '#title' => 'Share on Facebook',
-        '#default_value' => FALSE,
-      );
-    $form['simpleshare']['ss_twitter'] = array(
-        '#type' => 'checkbox',
-        '#title' => 'Share on Twitter',
+        '#title' => 'Share on Facebook and Twitter',
         '#default_value' => FALSE,
       );
    
@@ -44,39 +40,45 @@ function simpleshare_form_alter(&$form, $form_state, $form_id) {
 */
 function simpleshare_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
 
-  if($op == 'insert' || $op == 'update') {
-    $loaded_node = node_load($node->nid);
-     
-     if($node->ss_fb == 1) {
-      $fb_appid = '140132722716254';
-      $link = url($loaded_node->path, array('absolute' => TRUE));
-      $title = $loaded_node->title;
-      $message= 'Just posted ' . filter_xss($loaded_node->teaser);
-      $caption = filter_xss($loaded_node->teaser);
-      $picture = 'http://mustardseed.dyndns.tv/screencast/sites/all/themes/acquia_marina/logo.png';
-      $redirect =  url($loaded_node->path, array('absolute' => TRUE));
-      
-      $path = url('http://www.facebook.com/dialog/feed');
-      $query = array('app_id' => $fb_appid, 'link' => $link, 'picture' => $picture, 'name' => $title, 'caption' => $caption, 'message' => $message, 'redirect_uri' =>$redirect);
-    
-      drupal_goto($path, $query, $fragment);
-      
-      
+  if($op == 'insert' || $op == 'update') {   
+     if($node->ss_share == 1) {
+        $query = array('simpleshare' => 'true');
+        drupal_goto($node->path, $query); 
     }
-    
-    if($node->ss_twitter == 1) {
-      $url = url('node/' . $loaded_node->nid, array('absolute' => TRUE));
-      $text = $loaded_node->title;
-      
-      $path = url('http://twitter.com/share');
-      $query = array('url' => $url, 'text' => $text); 
-      drupal_goto($path, $query, $fragment);
-    }
-
   }
+    
+  if($op == 'view' && $_GET['simpleshare'] == 'true') {
+    drupal_add_js(drupal_get_path('module', 'simpleshare') . '/simpleshare.js');
+    drupal_add_css(drupal_get_path('module', 'simpleshare') . '/simpleshare.css');
+      
+    $fb_appid = '140132722716254';
+    $link = url('node/' . $node->nid, array('absolute' => TRUE));
+    $title = $node->title;
+    $message= 'Just posted ' . filter_xss($node->teaser);
+    $picture = 'http://mustardseed.dyndns.tv/screencast/sites/all/themes/acquia_marina/logo.png';
+    $redirect = url('node/' . $node->nid, array('absolute' => TRUE, 'query' =>array('simpleshare' => 'true')));
+      
+    $fb_path = url('http://www.facebook.com/dialog/feed');
+    $fb_query = array('app_id' => $fb_appid, 'link' => $link, 'picture' => $picture, 'name' => $title, 'caption' => $caption, 'message' => $message, 'redirect_uri' =>$redirect, 'display' => 'popup');
+    
+   
+    $output .= '<div id="fade" class="simpleshare hideme"></div>';
+    $output .= '<div id="simpleshare-modal" class="simpleshare hideme">';
+    $output .= '<h2>Share it!</h2>';
+    $output .= '<div id="simpleshare-fb">';
+    $output .= l('Share on Facebook', $fb_path, array('query' =>$fb_query, 'attributes' => array('class' => 'simpleshare-popup')));
+    $output .= '</div>';
+   
+    $twit_path = url('http://twitter.com/share');
+    $twit_query = array('url' => $link, 'text' => $title);
 
+    $output .= '<div id="simpleshare-twitter">';
+    $output .= l('Share on Twitter', $twit_path, array('query' =>$twit_query, 'attributes' => array('class' => 'simpleshare-popup')));
+    $output .= '</div>';
+    $output .= '<div class="clear close-inv-modal closemodal"><input type="button" value="All Done Sharing"></div>';
+    $output .= '</div>';
+    
+    print $output;
+    
+  }
 }
-
-
-
-
