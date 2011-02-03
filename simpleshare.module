@@ -6,7 +6,6 @@
  * Very simple integration to post stuff to fb and twitter
  */
 
-
 /**
  * Implements hook_form_alter().
  *
@@ -33,35 +32,51 @@ function simpleshare_form_alter(&$form, $form_state, $form_id) {
         '#title' => 'Share on Twitter',
         '#default_value' => FALSE,
       );
-      
-    $form['#submit'][] = 'simpleshare_node_submit';
    
     }
     
-
-    
 }
 
-/**
-  * Submit handler for simpleshare
-  */
-function simpleshare_node_submit(&$form, $form_state) {
-    
-    if($form_state['values']['ss_fb'] == 1 || $form_state['values']['ss_twitter'] == 1) {
+
+/*
+* Implementation of hook_nodeapi
+* after node creation, if they've checked to post to social networks, give them the forms to do so
+*/
+function simpleshare_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+
+  if($op == 'insert' || $op == 'update') {
+    $loaded_node = node_load($node->nid);
+     
+     if($node->ss_fb == 1) {
       $fb_appid = '140132722716254';
-      $link = url('node/' . $node->nid, array('absolute' => TRUE));
-      $title = $form_state['values']['title'];
-      $message= 'Just posted ' . filter_xss($form_state['values']['teaser']);
+      $link = url($loaded_node->path, array('absolute' => TRUE));
+      $title = $loaded_node->title;
+      $message= 'Just posted ' . filter_xss($loaded_node->teaser);
+      $caption = filter_xss($loaded_node->teaser);
       $picture = 'http://mustardseed.dyndns.tv/screencast/sites/all/themes/acquia_marina/logo.png';
-      $redirect =  url('node/' . $node->nid, array('absolute' => TRUE));
+      $redirect =  url($loaded_node->path, array('absolute' => TRUE));
+      
+      $path = url('http://www.facebook.com/dialog/feed');
+      $query = array('app_id' => $fb_appid, 'link' => $link, 'picture' => $picture, 'name' => $title, 'caption' => $caption, 'message' => $message, 'redirect_uri' =>$redirect);
     
-          
-    $path = url('http://www.facebook.com/dialog/feed');
-    $query = array('app_id' => $fb_appid, 'link' => $link, 'picture' => $picture, 'name' => $title, 'caption' => $caption, 'message' => $message, 'redirect_uri' =>$redirect);
-    
-    drupal_goto($path, $query, $fragment);
+      drupal_goto($path, $query, $fragment);
       
       
     }
+    
+    if($node->ss_twitter == 1) {
+      $url = url('node/' . $loaded_node->nid, array('absolute' => TRUE));
+      $text = $loaded_node->title;
+      
+      $path = url('http://twitter.com/share');
+      $query = array('url' => $url, 'text' => $text); 
+      drupal_goto($path, $query, $fragment);
+    }
+
+  }
 
 }
+
+
+
+
