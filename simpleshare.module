@@ -56,7 +56,7 @@ function simpleshare_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
     $title = $node->title;
     $message= 'Just posted ' . filter_xss($node->teaser);
     $picture = 'http://mustardseed.dyndns.tv/screencast/sites/all/themes/acquia_marina/logo.png';
-    $redirect = url('node/' . $node->nid, array('absolute' => TRUE, 'query' =>array('simpleshare' => 'true')));
+    $redirect = url('node/' . $node->nid, array('absolute' => TRUE, 'query' =>array('shared' => 'true')));
       
     $fb_path = url('http://www.facebook.com/dialog/feed');
     $fb_query = array('app_id' => $fb_appid, 'link' => $link, 'picture' => $picture, 'name' => $title, 'caption' => $caption, 'message' => $message, 'redirect_uri' =>$redirect, 'display' => 'popup');
@@ -80,5 +80,11 @@ function simpleshare_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
     
     print $output;
     
+  }
+  
+  if($op == 'view' && $_GET['shared'] == 'true') {
+    //close the facebook window
+    $output .= '<SCRIPT LANGUAGE="javascript">window.close();</SCRIPT>';
+    print $output;
   }
 }
