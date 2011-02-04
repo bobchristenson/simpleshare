@@ -5,6 +5,14 @@
  *
  * Very simple integration to post stuff to fb and twitter
  */
+ 
+/*Implementaiton of hook_perm
+*/
+
+function simpleshare_perm() {
+return array('share content', 'administer simpleshare');
+}
+
 
 /**
  * Implements hook_form_alter().
@@ -16,25 +24,24 @@
 function simpleshare_form_alter(&$form, $form_state, $form_id) {
   // Add stream publish option.
     if ($form['#id'] == 'node-form') {
-      // Add checkbox to control feed publish.
-      $simpletypes = variable_get('simpleshare_node_types', 0);   
-        
-        //ADD IF STATEMENT TO CHECK TYPE
-        
-        
+      $node = $form['#node'];
+      $simpletypes = array_values(variable_get('simpleshare_node_types', array()));  
+
+      if (in_array($node->type, $simpletypes, TRUE)) {
         $form['simpleshare'] = array(
          '#type' => 'fieldset',
          '#title' => 'Share',
-         '#description' => 'After submitting this content you will be be given the oppotunity to share it on facebook and twitter if you check this box',
+         '#description' => 'After submitting this content you will be be given the opportunity to share it on social networks if you check this box',
+         '#access' => user_access('share content'),
         );
       
        $form['simpleshare']['ss_share'] = array(
           '#type' => 'checkbox',
-         '#title' => 'Share on Facebook and Twitter',
+         '#title' => 'Share This',
          '#default_value' => FALSE,
       );
-
     }
+  }
 }
 
 
@@ -55,28 +62,38 @@ function simpleshare_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
     drupal_add_js(drupal_get_path('module', 'simpleshare') . '/simpleshare.js');
     drupal_add_css(drupal_get_path('module', 'simpleshare') . '/simpleshare.css');
       
-    $fb_appid = '140132722716254';
+    $fb_appid = variable_get('simpleshare_facebook_id', NULL);
     $link = url('node/' . $node->nid, array('absolute' => TRUE));
     $title = $node->title;
-    $message= 'Just posted ' . filter_xss($node->teaser);
-    $picture = 'http://mustardseed.dyndns.tv/screencast/sites/all/themes/acquia_marina/logo.png';
+    
+    //add logo in here?  let them add their own? When decided add back to fb_query array
+    //$picture = NULL'
     $redirect = url('node/' . $node->nid, array('absolute' => TRUE, 'query' =>array('simpleshare' => 'success')));
       
-    $fb_path = url('http://www.facebook.com/dialog/feed');
-    $fb_query = array('app_id' => $fb_appid, 'link' => $link, 'picture' => $picture, 'name' => $title, 'caption' => $caption, 'message' => $message, 'redirect_uri' =>$redirect, 'display' => 'popup');
-    
-   
     $output .= '<div id="fade" class="simpleshare hideme"></div>';
     $output .= '<div id="simpleshare-modal" class="simpleshare hideme">';
     $output .= '<h2>Share it!</h2>';
-    $output .= '<div id="simpleshare-fb">';
-    $output .= l('Share on Facebook', $fb_path, array('query' =>$fb_query, 'attributes' => array('class' => 'simpleshare-popup')));
-    $output .= '</div>';
    
+   //build the fb path
+    if($fb_appid) {
+      $fb_path = url('http://www.facebook.com/dialog/feed');
+      $fb_query = array('app_id' => $fb_appid, 'link' => $link, 'name' => $title, 'caption' => $caption, 'redirect_uri' =>$redirect, 'display' => 'popup');
+      //output fb link
+     $output .= '<div id="simpleshare-fb">';
+      $output .= l('Share on Facebook', $fb_path, array('query' =>$fb_query, 'attributes' => array('class' => 'simpleshare-popup')));
+      $output .= '</div>';
+    }
+   
+    //build the twitter path
     $twit_path = url('http://twitter.com/share');
     $twit_query = array('url' => $link, 'text' => $title);
-
-    $output .= '<div id="simpleshare-twitter">';
+    
+    //output twitter link
+    if($fb_appid) {
+      $output .= '<div id="simpleshare-twitter">';
+    } else {
+      $output .= '<div id="simpleshare-twitter-nofb">';
+    }
     $output .= l('Share on Twitter', $twit_path, array('query' =>$twit_query, 'attributes' => array('class' => 'simpleshare-popup')));
     $output .= '</div>';
     $output .= '<div class="clear close-inv-modal closemodal"><input type="button" value="All Done Sharing"></div>';
@@ -103,7 +120,7 @@ function simpleshare_menu () {
     'description' => 'Settings for Simpleshare',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('simpleshare_admin_settings'),
-    'access arguments' => array('administer Simpleshare'),
+    'access arguments' => array('administer simpleshare'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'simpleshare.admin.inc'
   );

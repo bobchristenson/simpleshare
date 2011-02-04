@@ -31,12 +31,20 @@
   margin: 0px 5px 10px 0px;
 }
 
+#simpleshare-twitter-nofb {
+  width: 128px;
+  float: none;
+  margin: 0px auto;
+  margin-bottom: 10px;
+}
+
 #simpleshare-twitter  {
   margin-right: 0px;
 }
 
 #simpleshare-fb a,
-#simpleshare-twitter a {
+#simpleshare-twitter a,
+#simpleshare-twitter-nofb a {
   display: block;
 	overflow: hidden;
 	height: 0px;
@@ -45,9 +53,14 @@
 	padding-top: 64px;
 }
 
-#simpleshare-twitter a {
+#simpleshare-twitter a,
+#simpleshare-twitter-nofb a {
   background-image: url(images/twit-share.png);
   margin-left: 10px;
+}
+
+#simpleshare-twitter-nofb a {
+  margin: 0px auto;
 }
 
 #simpleshare-modal .close-inv-modal {
