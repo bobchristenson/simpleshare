@@ -17,20 +17,24 @@ function simpleshare_form_alter(&$form, $form_state, $form_id) {
   // Add stream publish option.
     if ($form['#id'] == 'node-form') {
       // Add checkbox to control feed publish.
-      $form['simpleshare'] = array(
-        '#type' => 'fieldset',
-        '#title' => 'Share',
-        '#description' => 'After submitting this content you will be be given the oppotunity to share it on facebook and twitter if you check this box',
-      );
+      $simpletypes = variable_get('simpleshare_node_types', 0);   
+        
+        //ADD IF STATEMENT TO CHECK TYPE
+        
+        
+        $form['simpleshare'] = array(
+         '#type' => 'fieldset',
+         '#title' => 'Share',
+         '#description' => 'After submitting this content you will be be given the oppotunity to share it on facebook and twitter if you check this box',
+        );
       
-      $form['simpleshare']['ss_share'] = array(
-        '#type' => 'checkbox',
-        '#title' => 'Share on Facebook and Twitter',
-        '#default_value' => FALSE,
+       $form['simpleshare']['ss_share'] = array(
+          '#type' => 'checkbox',
+         '#title' => 'Share on Facebook and Twitter',
+         '#default_value' => FALSE,
       );
-   
+
     }
-    
 }
 
 
@@ -56,7 +60,7 @@ function simpleshare_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
     $title = $node->title;
     $message= 'Just posted ' . filter_xss($node->teaser);
     $picture = 'http://mustardseed.dyndns.tv/screencast/sites/all/themes/acquia_marina/logo.png';
-    $redirect = url('node/' . $node->nid, array('absolute' => TRUE, 'query' =>array('shared' => 'true')));
+    $redirect = url('node/' . $node->nid, array('absolute' => TRUE, 'query' =>array('simpleshare' => 'success')));
       
     $fb_path = url('http://www.facebook.com/dialog/feed');
     $fb_query = array('app_id' => $fb_appid, 'link' => $link, 'picture' => $picture, 'name' => $title, 'caption' => $caption, 'message' => $message, 'redirect_uri' =>$redirect, 'display' => 'popup');
@@ -82,9 +86,28 @@ function simpleshare_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
     
   }
   
-  if($op == 'view' && $_GET['shared'] == 'true') {
+  if($op == 'view' && $_GET['simpleshare'] == 'success') {
     //close the facebook window
     $output .= '<SCRIPT LANGUAGE="javascript">window.close();</SCRIPT>';
     print $output;
   }
 }
+
+/*
+  * Implementation of hook_menu
+  */
+  
+function simpleshare_menu () {
+  $items['admin/settings/simpleshare'] = array(
+    'title' => 'Simpleshare',
+    'description' => 'Settings for Simpleshare',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('simpleshare_admin_settings'),
+    'access arguments' => array('administer Simpleshare'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'simpleshare.admin.inc'
+  );
+  
+  return $items;
+}
+
