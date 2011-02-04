@@ -20,6 +20,16 @@ Installation
     
 4.  Setup permissions for who can edit and share on the /admin/user/permissions screen
 
+Usage Tips
+------------
+1.  You an always trigger the share modal by adding ?simpleshare=true to the end of a node url
+
+
+To Do
+-------
+1.  Add proper theme functions and templates rather than the nastyness that exists now
+
+
 Credits
 -------
 Created by Mustardseed Media Inc. (http://mustardseedmedia.com)
