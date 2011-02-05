@@ -1,6 +1,8 @@
 if (Drupal.jsEnabled) {
 	$(document).ready(function() {
-    $(".simpleshare").removeClass("hideme");	
+    $(".simpleshare").removeClass("hideme");
+    $(".no-js-button").addClass("hideme");	
+    
     $(".closemodal").click(function(){
       $(".simpleshare").addClass("hideme");
     });

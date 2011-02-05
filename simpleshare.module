@@ -70,8 +70,8 @@ function simpleshare_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
     //$picture = NULL'
     $redirect = url('node/' . $node->nid, array('absolute' => TRUE, 'query' =>array('simpleshare' => 'success')));
     
-    $output .= '<div id="fade" class="simpleshare hideme"></div>';
-    $output .= '<div id="simpleshare-modal" class="simpleshare hideme">';
+    $output .= '<div id="fade" class="simpleshare"></div>';
+    $output .= '<div id="simpleshare-modal" class="simpleshare">';
     $output .= '<h2>Share it!</h2>';
    
    //build the fb path
@@ -96,7 +96,9 @@ function simpleshare_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
     }
     $output .= l('Share on Twitter', $twit_path, array('query' =>$twit_query, 'attributes' => array('class' => 'simpleshare-popup')));
     $output .= '</div>';
-    $output .= '<div class="clear close-inv-modal closemodal"><input type="button" value="All Done Sharing"></div>';
+    $output .= '<div class="clear close-inv-modal closemodal"><span class="no-js-button">';
+    $output .= l("Done Sharing", 'node/' . $node->nid);
+    $output .= '</span><input class="simpleshare hideme" type="button" value="All Done Sharing"></div>';
     $output .= '</div>';
     
     print $output;
