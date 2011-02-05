@@ -44,6 +44,19 @@ function simpleshare_form_alter(&$form, $form_state, $form_id) {
   }
 }
 
+/**
+ * Implementation of hook_theme().
+ */
+function simpleshare_theme() {
+  return array (
+    'simpleshare_modal' => array(
+      'template' => 'simpleshare-modal',
+      'arguments' => array('node' => NULL),
+      'file' => 'simpleshare.modal.inc',
+    ),
+  );
+}
+
 
 /*
 * Implementation of hook_nodeapi
@@ -61,48 +74,7 @@ function simpleshare_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   if($op == 'view' && $_GET['simpleshare'] == 'true') {
     drupal_add_js(drupal_get_path('module', 'simpleshare') . '/simpleshare.js');
     drupal_add_css(drupal_get_path('module', 'simpleshare') . '/simpleshare.css');
-      
-    $fb_appid = variable_get('simpleshare_facebook_id', NULL);
-    $link = url('node/' . $node->nid, array('absolute' => TRUE));
-    $title = $node->title;
-    $description = drupal_substr($node->teaser, 140);
-    //add logo in here?  let them add their own? When decided add back to fb_query array
-    //$picture = NULL'
-    $redirect = url('node/' . $node->nid, array('absolute' => TRUE, 'query' =>array('simpleshare' => 'success')));
-    
-    $output .= '<div id="fade" class="simpleshare"></div>';
-    $output .= '<div id="simpleshare-modal" class="simpleshare">';
-    $output .= '<h2>Share it!</h2>';
-   
-   //build the fb path
-    if($fb_appid) {
-      $fb_path = url('http://www.facebook.com/dialog/feed');
-      $fb_query = array('app_id' => $fb_appid, 'link' => $link, 'name' => $title, 'description' => $description, 'redirect_uri' =>$redirect, 'display' => 'popup');
-      //output fb link
-     $output .= '<div id="simpleshare-fb">';
-      $output .= l('Share on Facebook', $fb_path, array('query' =>$fb_query, 'attributes' => array('class' => 'simpleshare-popup')));
-      $output .= '</div>';
-    }
-   
-    //build the twitter path
-    $twit_path = url('http://twitter.com/share');
-    $twit_query = array('url' => $link, 'text' => $title);
-    
-    //output twitter link
-    if($fb_appid) {
-      $output .= '<div id="simpleshare-twitter">';
-    } else {
-      $output .= '<div id="simpleshare-twitter-nofb">';
-    }
-    $output .= l('Share on Twitter', $twit_path, array('query' =>$twit_query, 'attributes' => array('class' => 'simpleshare-popup')));
-    $output .= '</div>';
-    $output .= '<div class="clear close-inv-modal closemodal"><span class="no-js-button">';
-    $output .= l("Done Sharing", 'node/' . $node->nid);
-    $output .= '</span><input class="simpleshare hideme" type="button" value="All Done Sharing"></div>';
-    $output .= '</div>';
-    
-    print $output;
-    
+    print theme('simpleshare_modal', $node);    
   }
   
   if($op == 'view' && $_GET['simpleshare'] == 'success') {
