@@ -72,9 +72,17 @@ function simpleshare_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   }
     
   if($op == 'view' && $_GET['simpleshare'] == 'true') {
-    drupal_add_js(drupal_get_path('module', 'simpleshare') . '/simpleshare.js');
-    drupal_add_css(drupal_get_path('module', 'simpleshare') . '/simpleshare.css');
-    print theme('simpleshare_modal', $node);    
+    $simpletypes = array_values(variable_get('simpleshare_node_types', array()));  
+    //don't share unless it's an allowed type
+    if (in_array($node->type, $simpletypes, TRUE)) {
+      if ($node->status == 1) {
+      drupal_add_js(drupal_get_path('module', 'simpleshare') . '/simpleshare.js');
+      drupal_add_css(drupal_get_path('module', 'simpleshare') . '/simpleshare.css');
+      print theme('simpleshare_modal', $node);
+      } else {
+        drupal_set_message('Sorry, you cannot share unpublished content. Mark it as published and try sharing again.', 'warning');
+      }
+    }  
   }
   
   if($op == 'view' && $_GET['simpleshare'] == 'success') {

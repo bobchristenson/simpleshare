@@ -27,9 +27,7 @@ Usage Tips
 
 To Do
 -------
-1.  Add proper theme functions and templates rather than the nastyness that exists now
-
-2.  Make it work without .js enabled.  Duh.
+1.  Change from drupal_goto to a redirect function to direct to modal
 
 
 Credits
