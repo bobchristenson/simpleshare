@@ -31,6 +31,7 @@ function simpleshare_form_alter(&$form, $form_state, $form_id) {
         $form['simpleshare'] = array(
          '#type' => 'fieldset',
          '#title' => 'Share',
+         '#attributes' => array('class' => 'simpleshare'),
          '#description' => 'After submitting this content you will be be given the opportunity to share it on social networks if you check this box',
          '#access' => user_access('share content'),
         );
